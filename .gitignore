@@ -1,0 +1,84 @@
+# Byte-compiled / cached files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+.ENV/
+venv.bak/
+.python-version
+
+# Distribution / packaging
+build/
+dist/
+.eggs/
+*.egg-info/
+*.egg
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage
+htmlcov/
+.coverage
+.coverage.*
+.pytest_cache/
+nosetests.xml
+coverage.xml
+
+# Jupyter
+.ipynb_checkpoints
+
+# IDEs / editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+
+# Logs and runtime files
+*.log
+logs/
+debug.log
+*.pid
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Data, models and artifacts (adjust if you commit any of these intentionally)
+data/
+datasets/
+models/
+saved_models/
+checkpoints/
+artifacts/
+mlruns/
+*.csv
+*.tsv
+*.h5
+*.hdf5
+*.h5py
+*.pt
+*.pth
+*.ckpt
+*.joblib
+*.pkl
+*.pickle
+*.safetensors
+
+# Databases
+*.sqlite3
+*.db
+
+# Misc
+*.bak
+*.manifest
+*.spec

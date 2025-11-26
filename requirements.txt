@@ -1,0 +1,7 @@
+transformers>=4.0.0
+torch
+fastapi
+uvicorn
+safetensors
+scikit-learn
+pydantic
