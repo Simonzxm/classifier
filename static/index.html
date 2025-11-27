@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Classifier</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .input-group {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            padding-right: 40px; /* Space for remove button */
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            font-size: 16px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 30px;
+            height: 30px;
+            background-color: transparent;
+            color: #999;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        .remove-btn:hover {
+            background-color: #eee;
+            color: #dc3545;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .primary-btn {
+            background-color: #007bff;
+            color: white;
+            flex-grow: 2;
+        }
+        .primary-btn:hover {
+            background-color: #0056b3;
+        }
+        .secondary-btn {
+            background-color: #6c757d;
+            color: white;
+            flex-grow: 1;
+        }
+        .secondary-btn:hover {
+            background-color: #5a6268;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        .result-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background-color: #fff;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .label {
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+        .label-通知 {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .label-非通知 {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .score {
+            color: #666;
+            font-size: 0.85em;
+            margin-top: 4px;
+            text-align: right;
+        }
+        .text-content {
+            flex-grow: 1;
+            margin-right: 15px;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+        .meta-content {
+            text-align: right;
+            min-width: 100px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Notification Classifier</h1>
+        <p>输入文本（支持多条，每条可包含换行），点击预测。</p>
+        
+        <div id="inputs-container">
+            <div class="input-group">
+                <textarea class="text-input" placeholder="在此输入文本..."></textarea>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="addInput()" class="secondary-btn">+ 添加文本</button>
+            <button onclick="predict()" class="primary-btn">预测</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function addInput() {
+            const container = document.getElementById('inputs-container');
+            const div = document.createElement('div');
+            div.className = 'input-group';
+            div.innerHTML = `
+                <textarea class="text-input" placeholder="在此输入文本..."></textarea>
+                <button class="remove-btn" onclick="removeInput(this)" title="删除">×</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeInput(btn) {
+            const container = document.getElementById('inputs-container');
+            if (container.children.length > 1) {
+                btn.parentElement.remove();
+            } else {
+                btn.parentElement.querySelector('textarea').value = '';
+            }
+        }
+
+        async function predict() {
+            const inputs = document.querySelectorAll('.text-input');
+            const texts = Array.from(inputs)
+                .map(input => input.value)
+                .filter(text => text.trim() !== '');
+
+            if (texts.length === 0) {
+                alert("请输入至少一段文本");
+                return;
+            }
+
+            const predictBtn = document.querySelector('.primary-btn');
+            const originalText = predictBtn.innerText;
+            predictBtn.innerText = '预测中...';
+            predictBtn.disabled = true;
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ texts: texts })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                displayResults(texts, data.labels, data.scores);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('预测失败，请重试。');
+            } finally {
+                predictBtn.innerText = originalText;
+                predictBtn.disabled = false;
+            }
+        }
+
+        function displayResults(texts, labels, scores) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            texts.forEach((text, index) => {
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                
+                const labelClass = labels[index] === '通知' ? 'label-通知' : 'label-非通知';
+                
+                div.innerHTML = `
+                    <div class="text-content">${escapeHtml(text)}</div>
+                    <div class="meta-content">
+                        <span class="label ${labelClass}">${labels[index]}</span>
+                        <div class="score">置信度: ${(scores[index] * 100).toFixed(1)}%</div>
+                    </div>
+                `;
+                resultsDiv.appendChild(div);
+            });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

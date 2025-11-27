@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from typing import List
 import torch
@@ -60,6 +61,12 @@ def predict(req: PredictRequest):
     return PredictResponse(labels=labels, scores=scores)
 
 
-@app.get('/')
+@app.get('/', response_class=HTMLResponse)
 def root():
+    with open("static/index.html", "r", encoding="utf-8") as f:
+        return f.read()
+
+
+@app.get('/status')
+def status():
     return {"status": "ok", "model_dir": MODEL_DIR}
