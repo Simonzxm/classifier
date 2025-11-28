@@ -13,8 +13,11 @@ MODEL_DIR = "./model"
 def sanitize_text(text):
     if not isinstance(text, str):
         return ""
-    url_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
-    return re.sub(url_pattern, '[URL_PLACEHOLDER]', text)
+    url_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+    sanitized_text = re.sub(url_pattern, '[URL_PLACEHOLDER]', text)
+    email_pattern = r"(?:mailto:)?\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"
+    sanitized_text = re.sub(email_pattern, '[EMAIL_PLACEHOLDER]', sanitized_text)
+    return sanitized_text
 
 
 def load_data():

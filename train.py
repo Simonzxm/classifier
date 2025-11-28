@@ -30,7 +30,14 @@ def sanitize_text(text):
     
     # 替换所有找到的URL为占位符 [URL_PLACEHOLDER]
     sanitized_text = re.sub(url_pattern, '[URL_PLACEHOLDER]', text)
-    
+
+    # 匹配常见邮箱地址 (包含 mailto: 前缀的情况)
+    # 示例匹配：user@example.com, first.last+tag@sub.domain.co
+    email_pattern = r"(?:mailto:)?\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"
+
+    # 将邮箱替换为占位符 [EMAIL_PLACEHOLDER]
+    sanitized_text = re.sub(email_pattern, '[EMAIL_PLACEHOLDER]', sanitized_text)
+
     return sanitized_text
 
 # --- 2. 准备数据：从 CSV 文件加载 ---
