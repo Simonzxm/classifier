@@ -2,7 +2,7 @@ import csv
 import json
 import requests
 
-LOG_FILE = "data.csv"
+LOG_FILE = "logs.csv"
 OUTPUT_FILE = "out.csv"
 
 with open(LOG_FILE, mode='r', newline='') as file:
