@@ -5,10 +5,16 @@ from typing import List
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import re
+import csv
+import os
 
 app = FastAPI(title="Notification Classifier")
 
 MODEL_DIR = "./model"
+LOG_DIR = "./logs"
+
+if not os.path.exists(LOG_DIR):
+    os.makedirs(LOG_DIR)
 
 
 def sanitize_text(text: str) -> str:
@@ -56,6 +62,13 @@ def predict(req: PredictRequest):
         scores, preds = torch.max(probs, dim=1)
         preds = preds.cpu().tolist()
         scores = scores.cpu().tolist()
+
+    # Log predictions
+    log_file = os.path.join(LOG_DIR, "inference_log.csv")
+    with open(log_file, mode='a', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        for text, label in zip(req.texts, preds):
+            writer.writerow([text, label])
 
     labels = [label_map[p] for p in preds]
     return PredictResponse(labels=labels, scores=scores)
