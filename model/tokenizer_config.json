@@ -32,7 +32,7 @@
       "single_word": false,
       "special": true
     },
-    "250101": {
+    "128000": {
       "content": "[MASK]",
       "lstrip": false,
       "normalized": false,

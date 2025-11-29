@@ -72,7 +72,7 @@ eval_dataset = Dataset.from_pandas(eval_df).remove_columns(["__index_level_0__"]
 
 # --- 3. 模型加载与 Tokenization ---
 
-MODEL_ID = "MoritzLaurer/mDeBERTa-v3-base-mnli-xnli" 
+MODEL_ID = "MoritzLaurer/deberta-v3-large-zeroshot-v2.0"
 NUM_LABELS = 2 
 
 # 加载分词器和模型 (num_labels=2 for binary classification)
